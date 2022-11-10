@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,17 +11,33 @@ namespace Class_Auto
     {
         static void Main(string[] args)
         {
+            Auto passengerCar = new PassengerCar("Passenger", 8.0, 50.0, 85.0, 30.0, 270.0, 2 );
+            Auto truck = new Truck("Truck", 11.2, 100.0, 73.0, 50.0, 50.5, 6.0);
+            Auto sportcar = new SportCar("Sport", 10.0, 70.0, 120.0, 30.0, 50.0);
+            passengerCar.DistanceMethod();
+            passengerCar.PowerReserv();
+            passengerCar.Display();
+
+            truck.DistanceMethod();
+            truck.PowerReserv();
+            truck.Display();
+
+            sportcar.DistanceMethod();
+            sportcar.PowerReserv();
+            sportcar.Display();
+
+            Console.ReadKey();
         }
     }
-    abstract class Avto
+    abstract class Auto
     {
-        public string TCtype { get; set; }
-        public double AvFuelCons { get; set; }
-        public double TankSize { get; set; }
-        public double Speed { get; set; }
-        public double Fuel { get; set; }
-        public double Distance { get; set; }
-        public Avto(string tc_type, double av_fuel_cons, double tank_size, double speed, double fuel, double distance)
+        protected string TCtype { get; set; } //тип ТС
+        protected double AvFuelCons { get; set; } //Средний расход топлива
+        protected double TankSize { get; set; }// Объем бака
+        protected double Speed { get; set; } //Скорость
+        protected double Fuel { get; set; } //Остаток топлива
+        protected double Distance { get; set; } //Расстояние
+        public Auto(string tc_type, double av_fuel_cons, double tank_size, double speed, double fuel, double distance)
         {
             TCtype = tc_type;
             AvFuelCons = av_fuel_cons;
@@ -39,8 +56,8 @@ namespace Class_Auto
                 return Fuel / AvFuelCons;
         }
 
-        public virtual double PowerReserv()
-            { return TankSize / AvFuelCons; }
+        public virtual void PowerReserv()
+            { double result = TankSize / AvFuelCons; }
 
         public double Time()
         { return Distance / Speed; }
@@ -48,45 +65,70 @@ namespace Class_Auto
 
         public void Display()
         {
-            Console.WriteLine($"Avto Type: {TCtype}, Average fuel consumption: {AvFuelCons} , Tank size: {TankSize} , Speed: {Speed}");
+            Console.WriteLine($"Auto Type: {TCtype}, Average fuel consumption: {AvFuelCons} , Tank size: {TankSize} , Speed: {Speed}");
         }
 
     }
-    class PassengerCar : Avto
+    class PassengerCar : Auto
     {
 
-        public int Passengers { get; set; }
+        protected int Passengers { get; set; }
+       
         public PassengerCar(string tc_type, double av_fuel_cons, double tank_size, double speed, double fuel, double distance, int passengers)
-            : base(tc_type,av_fuel_cons, tank_size, speed, fuel, distance)
+            :base(tc_type, av_fuel_cons, tank_size, speed, fuel, distance)
         {
             Passengers = passengers;
             
         }
-        public override sealed double PowerReserv()
+        
+        public override void PowerReserv()
         {
             base.PowerReserv();
-            return TankSize / AvFuelCons;
+
+            if (Passengers <= 4)
+            {
+                
+                double result = (TankSize / AvFuelCons) - (TankSize / AvFuelCons) * 6 / 100 * Passengers;
+                Console.WriteLine($"Запас хода легкового авто при {Passengers} пассажирах равен {result}");
+
+
+            }
+            else
+            {
+                Console.WriteLine("Количество пассажиров превышает допустимое для легкового авто"); 
+                
+            }
+
         }
 
     }
-    class Truck : Avto
+    class Truck : Auto
     {
 
-        public double Tonnage { get; set; }
+        protected double Tonnage { get; set; }
         public Truck(string tc_type, double av_fuel_cons, double tank_size, double speed, double fuel,double distance,  double tonnage)
-            : base(tc_type, av_fuel_cons, tank_size, speed, fuel, distance)
+            :base(tc_type, av_fuel_cons, tank_size, speed, fuel, distance)
         {
             Tonnage = tonnage;
 
         }
-        public override sealed double PowerReserv()
+        public override void PowerReserv()
         {
-            base.PowerReserv();
-            return TankSize / AvFuelCons;
+            if (Tonnage <= 20000)
+            {
+                base.PowerReserv();
+                double result =  (TankSize / AvFuelCons) - (TankSize / AvFuelCons) * 6 / 100 * Tonnage/200;
+                Console.WriteLine($"Запас хода грузового авто при {Tonnage} тоннаже равен {result}");
+            }
+            else
+            {
+                Console.WriteLine("Количество пассажиров превышает допустимое для легкового авто");
+
+            }
         }
 
     }
-    class SportCar : Avto
+    class SportCar : Auto
     {
 
         
@@ -101,6 +143,5 @@ namespace Class_Auto
 }
 
 
-// в Легковом авто проверка на допустимое кол-во пассажиров, переопределение метода для расчпета запаса хода
-// в Грузовом авто проверка на полный загруз, переопределение метода расчета запаса хода
+
 // Создание объектов классов в Main
